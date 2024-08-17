@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with AI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Include your existing CSS styles here */
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Chat with AI</h1>
+        <div id="chat-history">
+            {% for sender, message in chat_history %}
+                <div class="message {% if sender == 'User' %}user-message{% else %}ai-message{% endif %}">
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        <form id="chat-form">
+            <input type="text" id="user-message" placeholder="Type your message here" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#chat-form').on('submit', function(e) {
+                e.preventDefault();
+                var userMessage = $('#user-message').val();
+                
+                // Append user message to chat history
+                $('#chat-history').append('<div class="message user-message"><span>' + userMessage + '</span></div>');
+                
+                // Clear input field
+                $('#user-message').val('');
+                
+                // Send message to server
+                $.ajax({
+                    url: '/api/chat',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({message: userMessage}),
+                    success: function(response) {
+                        // Append AI response to chat history
+                        $('#chat-history').append('<div class="message ai-message"><span>' + response.ai_response + '</span></div>');
+                        
+                        // Scroll to bottom of chat history
+                        var chatHistory = document.getElementById('chat-history');
+                        chatHistory.scrollTop = chatHistory.scrollHeight;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
